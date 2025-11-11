@@ -1,0 +1,52 @@
+# =============================================
+# Proyecto DevOps - Node.js + MySQL
+# Comunicación garantizada entre contenedores
+# =============================================
+
+services:
+  mysql_db:
+    image: mysql:8.0
+    container_name: devops_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: RootPass2025!
+      MYSQL_DATABASE: devops_project
+      MYSQL_USER: dev_user
+      MYSQL_PASSWORD: DevPass2025!
+    ports:
+      - "3308:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - devops_network                 # <--- 👈 Añadido aquí
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+
+  api_server:
+    build: ./backend
+    container_name: devops_api
+    restart: on-failure
+    depends_on:
+      mysql_db:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "4001:4000"
+    # volumes:
+    #   - ./backend:/app
+    command: npm start
+    networks:
+      - devops_network
+
+volumes:
+  mysql_data:
+
+networks:
+  devops_network:
+    driver: bridge

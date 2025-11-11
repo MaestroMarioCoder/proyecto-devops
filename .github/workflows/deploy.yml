@@ -1,0 +1,46 @@
+name: 🚀 CI/CD Pipeline - Dokploy Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Login en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 🧱 Construir imagen Docker
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/proyecto-devops:latest ./backend
+
+      - name: 🚀 Subir imagen a Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/proyecto-devops:latest
+
+      - name: 🌍 Desplegar en Dokploy
+        env:
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+        run: |
+          echo "Iniciando despliegue en Dokploy..."
+          curl -X POST https://api.dokploy.com/deploy \
+          -H "Authorization: Bearer $DOKPLOY_API_KEY" \
+          -H "Content-Type: application/json" \
+          -d '{
+                "service": "proyecto-devops",
+                "image": "'"${{ secrets.DOCKERHUB_USERNAME }}"'/proyecto-devops:latest"
+              }'
+          echo "Despliegue iniciado."
