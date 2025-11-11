@@ -27,7 +27,7 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/proyecto-devops:latest ./backend
 
-      - name: 🚀 Subir imagen a Docker Hub
+      - name:  Subir imagen a Docker Hub
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/proyecto-devops:latest
 
@@ -36,7 +36,8 @@ jobs:
           DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
         run: |
           echo "Iniciando despliegue en Dokploy..."
-          curl -X POST https://api.dokploy.com/deploy \
+          curl -X POST http://172.18.0.1:3000/api/deploy \
+
           -H "Authorization: Bearer $DOKPLOY_API_KEY" \
           -H "Content-Type: application/json" \
           -d '{
