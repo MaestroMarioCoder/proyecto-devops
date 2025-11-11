@@ -34,13 +34,16 @@ jobs:
       - name: 🌍 Desplegar en Dokploy
          env:
     DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
-  run: |
-    echo "Iniciando despliegue en Dokploy a través de ngrok..."
-    curl -X POST https://quimiotácticamente-semisartítica-melita.ngrok-free.dev/api/deploy \
-    -H "Authorization: Bearer $DOKPLOY_API_KEY" \
-    -H "Content-Type: application/json" \
-    -d '{
-          "service": "proyecto-devops",
-          "image": "'"${{ secrets.DOCKERHUB_USERNAME }}"'/proyecto-devops:latest"
-        }'
-    echo "Despliegue iniciado correctamente."
+        - name: Desplegar en Dokploy
+        env:
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+        run: |
+          echo "Iniciando despliegue en Dokploy..."
+          curl -X POST https://chemotactically-semisatiric-melita.ngrok-free.dev/deploy \
+          -H "Authorization: Bearer $DOKPLOY_API_KEY" \
+          -H "Content-Type: application/json" \
+          -d '{
+                "service": "proyecto-devops",
+                "image": "'"${{ secrets.DOCKERHUB_USERNAME }}"'/proyecto-devops:latest"
+              }'
+          echo "Despliegue iniciado."
